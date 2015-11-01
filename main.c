@@ -6,6 +6,7 @@
 //#include <util/atomic.h>
 
 #include "uart.h"
+#include "I2C_slave.h"
 
 #ifdef __GNUC__
 #  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
@@ -51,6 +52,8 @@ enum {
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 int main (void)
 {
+    I2C_init(0x32);
+
     sei();
 
     stdin = stdout = &uart0_stream;

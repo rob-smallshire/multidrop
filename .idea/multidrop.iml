@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/I2C_slave.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/I2C_slave.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/generic-gcc-avr.cmake" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/uart.c" isTestSource="false" />

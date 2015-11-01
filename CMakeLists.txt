@@ -148,6 +148,7 @@ add_definitions("-c")
 
 add_avr_executable(
         multidrop
+        I2C_slave.c
         main.c
         uart.c
 )

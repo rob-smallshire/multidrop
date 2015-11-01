@@ -537,8 +537,13 @@ Purpose:  called when the UART is ready to transmit the next byte
         /* calculate and store new buffer index */
         tmptail = (UART_TxTail + 1) & UART_TX0_BUFFER_MASK;
         UART_TxTail = tmptail;
+        // Clear TXC0 Hint: Which we do by writing 1
+        UART0_STATUS |= (1 << TXC0);
         /* get one byte from buffer and write it to UART */
         UART0_DATA = UART_TxBuf[tmptail];  /* start transmission */
+        // Wait for transmission to complete
+        while (!(UART0_STATUS & (1 << TXC0)));
+
     } else {
         /* tx buffer empty, disable UDRE interrupt */
         UART0_CONTROL &= ~_BV(UART0_UDRIE);
@@ -620,6 +625,41 @@ void uart0_init(uint16_t baudrate)
 
 } /* uart0_init */
 
+/*************************************************************************
+ * Function:  uart0_disable()
+ * Purpose:   Disable UART 0
+ */
+void uart0_disable(void)
+{
+    // The disabling of the Transmitter (setting the TXEN to zero)
+    // will not become effective until on going and pending
+    // transmissions are completed, that is, when the Transmit
+    // Shift Register and Transmit Buffer Register do not contain
+    // data to be transmitted. When disabled, the Transmitter will
+    // no longer override the TxDn pin.
+
+    // Disabling the receiver
+    // In contrast to the Transmitter, disabling of the Receiver will
+    // be immediate. Data from ongoing receptions will therefore be
+    // lost. When disabled (that is, the RXENn is set to zero) the
+    // Receiver will no longer override the normal function of the
+    // RxDn port pin. The Receiver buffer FIFO will be flushed when
+    // the Receiver is disabled. Remaining data in the buffer will be
+    // lost.
+    UART0_CONTROL = 0;
+
+    // The TXCn Flag can be used to check that the
+    // Transmitter has completed all transfers, and the RXC Flag
+    // can be used to check that there are no unread data
+    // in the receive buffer. Note that the TXCn Flag must be
+    // cleared before each transmission (before UDRn is
+    // written) if it is used for this purpose.
+    while (!(UART0_STATUS & (1 << TXC0)));
+
+    // Possible issue here is that this bit will never be set if no data has been written to the UART.
+    // One possible solution is to have this function actually transmit something.  Alternative is not
+    // to wait and make it clear that the client may need to delay.
+}
 
 /*************************************************************************
 Function: uart0_getc()
@@ -629,6 +669,12 @@ Returns:  lower byte:  received byte from ringbuffer
 **************************************************************************/
 uint16_t uart0_getc(void)
 {
+    // If UART0 is disabled signal that there is no data
+    if (!(UART0_CONTROL & (1<<RXEN0)))
+    {
+        return UART_NO_DATA;
+    }
+
 	uint16_t tmptail;
 	uint8_t data;
 
@@ -658,6 +704,12 @@ Returns:  lower byte:  next byte in ring buffer
 **************************************************************************/
 uint16_t uart0_peek(void)
 {
+    // If UART0 is disabled signal that there is no data
+    if (!(UART0_CONTROL & (1<<RXEN0)))
+    {
+        return UART_NO_DATA;
+    }
+
 	uint16_t tmptail;
 	uint8_t data;
 
@@ -682,6 +734,12 @@ Returns:  none
 **************************************************************************/
 void uart0_putc(uint8_t data)
 {
+    // If UART0 is disabled ignore the data
+    if (!(UART0_CONTROL & (1<<TXEN0)))
+    {
+        return;
+    }
+
 	uint16_t tmphead;
 
 	tmphead  = (UART_TxHead + 1) & UART_TX0_BUFFER_MASK;
