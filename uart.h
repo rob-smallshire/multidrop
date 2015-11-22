@@ -244,6 +244,8 @@ extern void uart0_init(uint16_t baudrate);
 
 extern void uart0_disable(void);
 
+extern uint16_t uart0_get_baud_rate(void);
+
 /**
  *  @brief   Get received byte from ringbuffer
  *

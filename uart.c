@@ -661,6 +661,15 @@ void uart0_disable(void)
     // to wait and make it clear that the client may need to delay.
 }
 
+uint16_t uart0_get_baud_rate(void) {
+    uint16_t baudrate = (UBRR0H << 8) | UBRR0L;
+    if (UART0_STATUS & (1<<U2X0))
+    {
+        baudrate |= 0x8000;
+    }
+    return baudrate;
+}
+
 /*************************************************************************
 Function: uart0_getc()
 Purpose:  return byte from ringbuffer

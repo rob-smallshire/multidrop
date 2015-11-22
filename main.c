@@ -52,7 +52,8 @@ enum {
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 int main (void)
 {
-    I2C_init(0x32);
+    uint8_t address = 0x32;
+    I2C_init(address);
 
     sei();
 
@@ -73,7 +74,7 @@ int main (void)
         PORTD &= ~_BV(PORTD6);
         _delay_ms(BLINK_DELAY_MS);
 
-        printf("Hello, Multidrop!\n");
+        printf("Hello, address %d at rate %d\n", address, uart0_get_baud_rate());
     }
 }
 #pragma clang diagnostic pop
