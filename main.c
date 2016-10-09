@@ -52,7 +52,7 @@ enum {
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 int main (void)
 {
-    uint8_t address = 0x32;
+    uint8_t address = 0x33;
     I2C_init(address);
 
     sei();
@@ -60,7 +60,7 @@ int main (void)
     stdin = stdout = &uart0_stream;
 
     // USB Serial 0
-    uart0_init(UART_BAUD_SELECT(9600, F_CPU));
+    //uart0_init(UART_BAUD_SELECT(9600, F_CPU));
 
     /* set pin 6 of PORTD for output*/
     DDRD |= _BV(DDD6);

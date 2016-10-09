@@ -39,17 +39,21 @@ enum SlaveRegister regaddr = 0;    // Store the Requested Register Address
 
 void next_register();
 
+static uint8_t baudcode = 0;
 
 uint8_t i2c_read_action() {
     uint8_t result;
     switch (regaddr) {
         case REGISTER_BAUDRATE:
-            printf("baud = %d", uart0_get_baud_rate());
-            result = 42;
+            printf("baudcode = %d", baudcode);
+            result = baudcode;
+            break;
         case REGISTER_PORTDSTATE:
             result = PORTD;
+            break;
         default:
             result = 0;
+            break;
     }
     next_register();
     return result;
@@ -60,25 +64,27 @@ void i2c_write_action(uint8_t regdata) {
     printf("%d", regdata);
     switch (regaddr) {
         case REGISTER_BAUDRATE:
+            baudcode = regdata;
             if (regdata == 0) {
                 // Disable USART0
-                //uart0_disable();
+                uart0_disable();
                 // PD0 and PD1 into high impedance state
                 // DDR PORT
                 // 0    0  - input, high impedance
-                //DDRD &=  ~(1<<PORTD0 | 1<<PORTD1);
-                //PORTD &= ~(1<<PORTD0 | 1<<PORTD1);
+                DDRD &=  ~(1<<PORTD0 | 1<<PORTD1);
+                PORTD &= ~(1<<PORTD0 | 1<<PORTD1);
             }
             else {
                 // Enable USART0
                 // Set baudrate to regdata * 600
-                //uart0_init(UART_BAUD_SELECT(regdata * 600, F_CPU));
+                uart0_init(UART_BAUD_SELECT(baudcode * 600UL, F_CPU));
             }
+            break;
         case REGISTER_PORTDSTATE:
             PORTD = regdata;
             break;
         default:
-            ;
+            break;
     }
     next_register();
 }
